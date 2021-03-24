@@ -1,0 +1,23 @@
+{% extends "posts/base.html" %}
+{% block content %}
+
+<main role="main" class="container">
+  <div class="row">
+    {% include "posts/card_author.html" %}
+
+    <div class="col-md-9">
+      {% for post in page %}
+      <!-- Начало блока с отдельным постом -->
+      {% include "posts/post_item.html" %}
+      <!-- Конец блока с отдельным постом -->
+      {% endfor %}
+
+      <!-- Вывод паджинатора -->
+      {% if page.has_other_pages %}
+      {% include "posts/paginator.html" with items=page paginator=paginator%}
+      {% endif %}
+    </div>
+  </div>
+</main>
+
+{% endblock %}

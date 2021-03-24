@@ -1,0 +1,42 @@
+{% extends "posts/base.html" %}
+{% block title %}Об авторе проекта{% endblock %}
+{% block content %}
+{% load user_filters %}
+<main role="main" class="container">
+  <div class="row">
+    <!-- Левый вспомогательный блок -->
+    <div class="col-md-3 mb-3 mt-1">
+      <div class="card">
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              <div class="h3">
+                Об авторе
+              </div>
+            </li>
+            {% load static %}
+            <p><img src="{% static 'images/about_author.png' %}" alt="Греюсь на солнышке" width=200></p>
+            <li class="list-group-item">
+              <div class="h6 text-muted">
+                Анна-Мария<br>Учится кодить на Python и поднимает с колен российскую электронную промышленность.
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- Тело страницы -->
+    <div class="col-md-9">
+      <div class="card-body">
+        <div class="card-text">
+          <p>
+            Привет, меня зовут Анна-Мария, я создала этот замечательный сайт, на котором будут публиковать свои мысли, записи и путевые заметки лучшие умы человечества (в основном живущие в моей голове).<br>
+            Я учуcь в практикуме уже месяца три, а вообще всю мою жизнь можно считать дорогой к программированию в каком-то смысле.<br>
+            Чтобы связаться со мной, выкрикните мое имя на спиритическом сеансе. Ну или пишите на почту: baziruwiha@yandex.ru
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}
