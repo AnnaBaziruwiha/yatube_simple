@@ -39,6 +39,7 @@ class PostFormTest(TestCase):
 
     def setUp(self):
         self.user = PostFormTest.author
+        self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
@@ -98,3 +99,33 @@ class PostFormTest(TestCase):
         initial_post.refresh_from_db()
         self.assertEqual(initial_post.text, form_data["text"])
         self.assertEqual(initial_post.group.pk, form_data["group"])
+
+
+def test_anonymous_cant_comment(self):
+    """Только авторизированный пользователь может комментировать"""
+    post = PostFormTest.post
+    author = post.author
+    before_comment = post.comments.count()
+    form_data = {
+        "text": "тестовый комментарий",
+    }
+    self.authorized_client.post(
+        reverse("add_comment",
+                kwargs={
+                    "username": author.username,
+                    "post_id": post.pk}),
+        form_data,
+        follow=True
+    )
+    after_authorized_comment = post.comments.count()
+    self.guest_client.post(
+        reverse("add_comment",
+                kwargs={
+                    "username": author.username,
+                    "post_id": post.pk}),
+        form_data,
+        follow=True
+    )
+    after_anonymous_comment = post.comments.count()
+    self.assertEqual(after_authorized_comment, (before_comment + 1))
+    self.assertEqual(after_authorized_comment, after_anonymous_comment)

@@ -5,10 +5,9 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from posts.models import Group, Post, User
+from posts.models import Follow, Group, Post, User
 
 TEST_DIR = "test_data"
-CACHE_TIME = 20
 
 
 class PostPagesTests(TestCase):
@@ -59,6 +58,7 @@ class PostPagesTests(TestCase):
             pass
 
     def setUp(self):
+        self.guest_client = Client()
         self.user = User.objects.create_user(username="test_user")
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
@@ -208,7 +208,7 @@ class PostPagesTests(TestCase):
         self.assertEqual(response.context["page"].end_index(), 10)
 
     def test_index_page_cache(self):
-        """Содержание страницы index сохраняется в кэше на время CACHE_TIME"""
+        """Содержание страницы index сохраняется в кэше"""
         response = self.authorized_client.get(reverse("index"))
         Post.objects.create(
             text="Тест кэша",
@@ -218,3 +218,43 @@ class PostPagesTests(TestCase):
         response_cache = self.authorized_client.get(reverse("index"))
         self.assertIsNotNone(Post.objects.get(text="Тест кэша"))
         self.assertEqual(response.content, response_cache.content)
+
+    def test_follow_unfollow_authorized_user(self):
+        """Авторизированный пользователь может подписываться и отписываться"""
+        author = PostPagesTests.author
+        before_follow = author.following.all()
+        self.authorized_client.get(reverse(
+            "profile_follow",
+            kwargs={"username": author.username}
+        ))
+        after_follow_count = author.following.count()
+        follow = Follow.objects.get(author=author, user=self.user)
+        self.authorized_client.get(reverse(
+            "profile_unfollow",
+            kwargs={"username": author.username}
+        ))
+        after_unfollow = author.following.all()
+        self.assertQuerysetEqual(before_follow, after_unfollow)
+        self.assertEqual(after_follow_count, ((before_follow.count()) + 1))
+        self.assertIsNotNone(follow)
+
+    def test_post_appearance_in_follow_index(self):
+        """Новая запись появится в follow_index только у подписчиков"""
+        author = PostPagesTests.author
+        post = PostPagesTests.post
+        self.authorized_client.get(reverse(
+            "profile_follow",
+            kwargs={"username": author.username}
+        ))
+        self.author_client.get(reverse(
+            "profile_follow",
+            kwargs={"username": self.user.username}
+        ))
+        response_following_author = self.authorized_client.get(
+            reverse("follow_index")
+        )
+        response_not_following_author = self.author_client.get(
+            reverse("follow_index")
+        )
+        self.assertEqual(response_following_author.context["page"][0], post)
+        self.assertNotIn(post, response_not_following_author.context["page"])
