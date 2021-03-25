@@ -78,6 +78,7 @@ def post_view(request, username, post_id):
     post = get_object_or_404(Post.objects.filter(author__username=username),
                              pk=post_id)
     comments = post.comments.all()
+    form = CommentForm()
     if request.user.is_authenticated:
         following = Follow.objects.filter(
             author=User.objects.get(username=username),
@@ -88,12 +89,14 @@ def post_view(request, username, post_id):
                        "posts": post.author.posts.all(),
                        "post": post,
                        "comments": comments,
+                       "form": form,
                        "following": following})
     return render(request, "posts/post.html", {
         "author": post.author,
         "posts": post.author.posts.all(),
         "post": post,
         "comments": comments,
+        "form": form,
     })
 
 
