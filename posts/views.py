@@ -1,8 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.shortcuts import (
-    get_list_or_404, get_object_or_404, redirect, render,
-)
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from yatube.settings import PER_PAGE
@@ -155,13 +153,13 @@ def add_comment(request, username, post_id):
 
 @login_required
 def follow_index(request):
-    is_following = get_list_or_404(Follow.objects.all(), user=request.user)
-    authors_list = [item.author for item in is_following]
-    posts = Post.objects.filter(author__in=authors_list)
+    user = request.user
+    is_following = user.follower.all()
+    list_of_authors = [item.author for item in is_following]
+    posts = Post.objects.filter(author__in=list_of_authors)
+
     paginator = Paginator(posts, PER_PAGE)
-
     page_number = request.GET.get("page")
-
     page = paginator.get_page(page_number)
     return render(request, "posts/follow.html",
                   {"page": page, "paginator": paginator})

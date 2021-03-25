@@ -4,7 +4,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from posts.models import Group, Post, User
+from posts.models import Comment, Group, Post, User
 
 TEST_DIR = "test_data"
 
@@ -118,14 +118,23 @@ def test_anonymous_cant_comment(self):
         follow=True
     )
     after_authorized_comment = post.comments.count()
+    form_data_anonym = {
+        "text": "анонимный комментарий",
+    }
     self.guest_client.post(
         reverse("add_comment",
                 kwargs={
                     "username": author.username,
                     "post_id": post.pk}),
-        form_data,
+        form_data_anonym,
         follow=True
     )
     after_anonymous_comment = post.comments.count()
     self.assertEqual(after_authorized_comment, (before_comment + 1))
     self.assertEqual(after_authorized_comment, after_anonymous_comment)
+    self.assertTrue(
+        Comment.objects.filter(text="тестовый комментарий").exists()
+    )
+    self.assertFalse(
+        Comment.objects.filter(text="анонимный комментарий").exists()
+    )
