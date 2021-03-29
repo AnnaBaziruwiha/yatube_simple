@@ -18,7 +18,7 @@
 {% endcache %}
 <!-- Вывод паджинатора -->
 {% if page.has_other_pages %}
-{% include "posts/paginator.html" with items=page paginator=paginator%}
+{% include "posts/paginator.html" with items=page %}
 {% endif %}
 
 {% endblock %}
