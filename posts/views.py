@@ -19,7 +19,7 @@ def index(request):
     return render(
         request,
         "posts/index.html",
-        {"page": page, "paginator": paginator}
+        {"page": page}
     )
 
 
@@ -32,8 +32,7 @@ def group_posts(request, slug):
     page = paginator.get_page(page_number)
 
     return render(request, "posts/group.html", {"group": group,
-                                                "page": page,
-                                                "paginator": paginator})
+                                                "page": page})
 
 
 @login_required
