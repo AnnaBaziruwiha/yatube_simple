@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from django.test import Client, TestCase
 
 from posts.models import Group, Post, User
@@ -34,23 +36,23 @@ class PostUrlTests(TestCase):
     def test_wrong_url_returns_404(self):
         """Сервер возвращает 404 если страница не найдена"""
         response = self.guest_client.get("/this/url/is/wrong/")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_homepage(self):
         """Страница / доступна любому пользователю"""
         response = self.guest_client.get("/")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_group_slug_exists_at_desired_location(self):
         """Страница /group/<slug>/ доступна любому пользователю"""
         group_slug = PostUrlTests.group.slug
         response = self.guest_client.get(f"/group/{group_slug}/")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_new_url_exists_at_desired_location_authorized(self):
         """Страница /new/ доступна авторизированному пользователю"""
         response = self.authorized_client.get("/new/")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_new_url_redirect_anonymous_to_login(self):
         """Страница /new/ перенаправит анонимного пользователя
@@ -65,21 +67,21 @@ class PostUrlTests(TestCase):
         """Страница /<username>/ доступна любому пользователю"""
         username = PostUrlTests.author.username
         response = self.guest_client.get(f"/{username}/")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_post_page(self):
         """Страница /<username>/<post_id>/ доступна любому пользователю"""
         post = PostUrlTests.post
         username = post.author.username
         response = self.guest_client.get(f"/{username}/{post.pk}/")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_post_edit_by_author(self):
         """Страница /<username>/<post_id>/edit доступна автору поста"""
         post = PostUrlTests.post
         username = post.author.username
         response = self.author_client.get(f"/{username}/{post.pk}/edit/")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_post_edit_by_authorized_not_author(self):
         """Страница /<username>/<post_id>/edit перенаправит всех кроме
