@@ -73,8 +73,9 @@ def profile(request, username):
 
 
 def post_view(request, username, post_id):
-    post = get_object_or_404(Post.objects.filter(author__username=username),
-                             pk=post_id)
+    post = get_object_or_404(
+        Post.objects.all(), pk=post_id, author__username=username
+    )
     comments = post.comments.all()
     form = CommentForm()
     if request.user.is_authenticated:
@@ -103,9 +104,10 @@ def post_edit(request, username, post_id):
     new_post = False
     url = reverse("post", kwargs={"username": username,
                                   "post_id": post_id})
-    post = get_object_or_404(Post.objects.filter(author__username=username),
-                             pk=post_id)
-    if request.user.id != post.author.id:
+    post = get_object_or_404(
+        Post.objects.all(), author__username=username, pk=post_id
+    )
+    if request.user != post.author:
         return redirect(url)
     form = PostForm(
         request.POST or None,
@@ -126,7 +128,9 @@ def post_edit(request, username, post_id):
 def add_comment(request, username, post_id):
     url = reverse("post", kwargs={"username": username,
                                   "post_id": post_id})
-    post = Post.objects.filter(author__username=username, pk=post_id).get()
+    post = get_object_or_404(
+        Post.objects.all(), author__username=username, pk=post_id
+    )
     comments = post.comments.all()
     form = CommentForm(
         request.POST or None
@@ -154,9 +158,7 @@ def add_comment(request, username, post_id):
 @login_required
 def follow_index(request):
     user = request.user
-    is_following = user.follower.all()
-    list_of_authors = [item.author for item in is_following]
-    posts = Post.objects.filter(author__in=list_of_authors)
+    posts = user.follower.all().prefetch_related("author__posts")
 
     paginator = Paginator(posts, PER_PAGE)
     page_number = request.GET.get("page")
