@@ -219,24 +219,29 @@ class PostPagesTests(TestCase):
         self.assertIsNotNone(Post.objects.get(text="Тест кэша"))
         self.assertEqual(response.content, response_cache.content)
 
-    def test_follow_unfollow_authorized_user(self):
-        """Авторизированный пользователь может подписываться и отписываться"""
+    def test_follow_authorized_user(self):
+        """Авторизированный пользователь может подписываться на других
+        пользователей
+        """
         author = PostPagesTests.author
-        before_follow = author.following.all()
         self.authorized_client.get(reverse(
             "profile_follow",
             kwargs={"username": author.username}
         ))
-        after_follow_count = author.following.count()
-        follow = Follow.objects.get(author=author, user=self.user)
+        self.assertTrue(Follow.objects.filter(author=author,
+                                              user=self.user).exists())
+
+    def test_unfollow_authorized_user(self):
+        """Авторизированный пользователь может отписываться на других
+        пользователей
+        """
+        author = PostPagesTests.author
         self.authorized_client.get(reverse(
             "profile_unfollow",
             kwargs={"username": author.username}
         ))
-        after_unfollow = author.following.all()
-        self.assertQuerysetEqual(before_follow, after_unfollow)
-        self.assertEqual(after_follow_count, ((before_follow.count()) + 1))
-        self.assertIsNotNone(follow)
+        self.assertFalse(Follow.objects.filter(author=author,
+                                               user=self.user).exists())
 
     def test_post_appearance_in_follow_index(self):
         """Новая запись появится в follow_index только у подписчиков"""
