@@ -3,6 +3,8 @@ Yatube is a simple social network site, where users can get subscribed to each o
 
 **NOTE**: This is a study project that was meant to be done in Russian only. Sorry for the inconvenience.
 
+![Screenshot_2](https://user-images.githubusercontent.com/46953758/131117390-c43297f7-1b5d-4df4-aad6-33861d0de72e.jpg)
+
 ## Introduction
 
 Yatube is a project made entirely on Django: authentication, automatic admin interface, Unittest were used. 
